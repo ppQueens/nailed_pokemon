@@ -3,7 +3,7 @@ from pyrogram.client.filters.filters import Filters
 from bot_client import client, pyrogram
 from bot_helpers import name_asked
 from pokemons import pokemons_list
-from db import save_pokemon_spawn_db
+from db_interaction import save_pokemon_spawn_db
 
 main_button = pyrogram.KeyboardButton(text='Добавить спавн покемона')
 keyboard = pyrogram.ReplyKeyboardMarkup(keyboard=[[main_button]])

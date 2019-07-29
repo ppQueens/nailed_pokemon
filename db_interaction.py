@@ -3,7 +3,7 @@ from geopy import Point
 from datetime import datetime
 
 import pokemons
-from utils import get_db_config
+from config_provider import get_db_config
 
 
 class SpawnDataValidation:
