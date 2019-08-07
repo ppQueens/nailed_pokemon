@@ -1,7 +1,10 @@
-import mysql.connector
+# import mysql.connector
+import psycopg2
+import os
 from geopy import Point
 from datetime import datetime
 
+import _pokemon_parse
 import pokemons
 from config_provider import get_db_config
 
@@ -60,19 +63,20 @@ def save_pokemon_spawn_db(pokemon, coordinates):
 
 
 def _populate_pokemons_table(pokemons):
-    cnx = mysql.connector.connect(**get_db_config())
-    cursor = cnx.cursor()
+    # cnx = mysql.connector.connect(**get_db_config())
+
+    connection = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
+    cursor = connection.cursor()
     add_spawn = ("INSERT INTO  spawns_map_pokemon"
                  "(pokemon_name, created, modified, pokemon_image_path) "
                  "VALUES (%s, %s, %s, %s)")
-    # data_spawn = (pokemon.lower(), *coordinates, datetime.now(), datetime.now(), False, False, 0)
     pokemons_data = [(pokemon_name, datetime.now(), datetime.now(), '') for pokemon_name in pokemons]
 
     cursor.executemany(add_spawn, pokemons_data)
-    cnx.commit()
+    connection.commit()
 
     cursor.close()
-    cnx.close()
+    connection.close()
     return True
 
 # data = ('bulbasaur', (30., 51.))
@@ -80,4 +84,5 @@ def _populate_pokemons_table(pokemons):
 # save_pokemon_spawn_db(*data)
 # import _pokemon_parse
 
-# print(_populate_pokemons_table(_pokemon_parse.get_pokemons_names()))
+def populate():
+    _populate_pokemons_table(_pokemon_parse.get_pokemons_names())
