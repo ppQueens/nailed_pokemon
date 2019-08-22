@@ -6,7 +6,7 @@ from timezonefinder import TimezoneFinder
 
 from geopy.geocoders import Nominatim
 geolocator = Nominatim()
-l = 46.865431, 35.390549
+l = 0, 0
 location = geolocator.reverse(l, language='en')
 # print(location.raw['address'])
 
