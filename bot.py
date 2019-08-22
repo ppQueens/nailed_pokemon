@@ -21,11 +21,11 @@ def ask_pokemon_name(client, message):
     client.send_message(chat_id, text='Имя покемона:')
     name_asked(True)
 
-POKEMON = None
+Pokemon = None
 @client.on_message(filters=Filters.create(lambda _, m: name_asked()))
 def save_pokemon_name(client, message):
     chat_id = message.chat.id
-    global POKEMON
+    global Pokemon
     POKEMON = pokemon = message.text.capitalize()
     if pokemon in pokemons_list:
         # client.send_message(chat_id, text='Имя покемона сохранено')
@@ -46,7 +46,7 @@ def _return_to_main_keyboard(client, message, text):
 @client.on_message(filters=Filters.location)
 def save_pokemon_spawn(client, message):
     location = message.location
-    if POKEMON and save_pokemon_spawn_db(POKEMON, (location.latitude, location.longitude)):
+    if Pokemon and save_pokemon_spawn_db(Pokemon, (location.latitude, location.longitude)):
         text = 'Спавн покемона помечен на карте'
     else:
         text = 'Спавн покемона помечен на карте'
