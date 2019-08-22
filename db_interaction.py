@@ -1,5 +1,5 @@
 # import mysql.connector
-import psycopg2
+import mysql
 import os
 from geopy import Point
 from datetime import datetime
@@ -32,7 +32,7 @@ class SpawnDataValidation:
         return self.pokemon in pokemons.pokemons_list
 
 
-def save_pokemon_spawn_db(pokemon, coordinates):
+def save_pokemon_spawn_db(pokemon, coordinates, dt, address):
     """
     :param pokemon: pokemon_name
     :type pokemon: str
@@ -47,9 +47,10 @@ def save_pokemon_spawn_db(pokemon, coordinates):
             cnx = mysql.connector.connect(**get_db_config())
             cursor = cnx.cursor()
             add_spawn = ("INSERT INTO  spawns_map_pokemonspawn"
-                         "(pokemon_id, lat, lon, created, modified, checked, legacy, migration_number) "
-                         "VALUES ((SELECT id FROM spawns_map_pokemon WHERE pokemon_name=%s), %s, %s, %s, %s, %s, %s, %s)")
-            data_spawn = (pokemon.capitalize(), *coordinates, datetime.now(), datetime.now(), False, False, 0)
+                         "(pokemon_id, lat, lon, created, time_zone, modified, country, state, city, confirming_spawn, confirmed, on_map) "
+                         "VALUES ((SELECT id FROM spawns_map_pokemon WHERE pokemon_name=%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+            data_spawn = (pokemon.capitalize(), *coordinates, dt, dt.tzinfo.zone, dt,
+                          address['country'], address['state'], address['city'], False, 0, False)
 
             cursor.execute(add_spawn, data_spawn)
             cnx.commit()
@@ -63,9 +64,9 @@ def save_pokemon_spawn_db(pokemon, coordinates):
 
 
 def _populate_pokemons_table(pokemons):
-    # cnx = mysql.connector.connect(**get_db_config())
+    connection = mysql.connector.connect(**get_db_config())
 
-    connection = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
+    # connection = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
     cursor = connection.cursor()
     add_spawn = ("INSERT INTO  spawns_map_pokemon"
                  "(pokemon_name, created, modified, pokemon_image_path) "
