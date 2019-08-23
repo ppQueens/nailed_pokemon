@@ -12,7 +12,7 @@ def db(query, data):
         connection = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
         cursor = connection.cursor()
     except psycopg2.DatabaseError as de:
-        connection = None
+        pass
         # log
     try:
         # print(cursor.mogrify(add_spawn, data_spawn))
@@ -24,8 +24,13 @@ def db(query, data):
         print(ae)
     except psycopg2.DatabaseError as de:
         connection.rollback()
+        #log
+
+    try:
         cursor.close()
         connection.close()
+    except Exception as e:
+        pass
         #log
     return False
 
