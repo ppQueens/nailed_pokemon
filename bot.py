@@ -1,19 +1,17 @@
 from datetime import datetime
 from pytz import timezone
-from timezonefinder import TimezoneFinder
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut
 
 from pyrogram.client.filters.filters import Filters
 
 from bot_client import client, pyrogram
-from bot_helpers import name_asked
+from bot_helpers import name_asked, get_tz, get_address
 from pokemons import pokemons_list
 from db_interaction import save_pokemon_spawn_db
 
 add_spawn = pyrogram.KeyboardButton(text='Добавить спавн покемона')
 show_map = pyrogram.KeyboardButton(text='Ссылка на карту')
-keyboard = pyrogram.ReplyKeyboardMarkup(keyboard=[[add_spawn, show_map]])
+subscribe_for_notification = pyrogram.KeyboardButton(text='Уведомлять о новых спавнах')
+keyboard = pyrogram.ReplyKeyboardMarkup(keyboard=[[add_spawn, show_map, subscribe_for_notification]])
 
 
 @client.on_message(filters=Filters.create(lambda _, m: m.text == '/start'))
@@ -62,25 +60,16 @@ def _return_to_main_keyboard(client, message, text):
 @client.on_message(filters=Filters.location)
 def save_pokemon_spawn(client, message):
     location = message.location
-
-    tf = TimezoneFinder()
-    try:
-        tz_str = tf.closest_timezone_at(lat=location.latitude, lng=location.longitude)
-    except Exception as e:
-        tz_str = 'UTC'
+    ###перенести на бекенд сайта
+    tz_str = get_tz(location)
 
     dt = datetime.fromtimestamp(message.date).astimezone(timezone(tz_str))
-
-    geolocator = Nominatim()
-    try:
-        loc = geolocator.reverse((location.latitude, location.longitude), language='en')
-        if Pokemon and save_pokemon_spawn_db(Pokemon, (location.latitude, location.longitude), dt, loc.raw['address']):
-            text = 'Спавн покемона будет добавлен на карту в течение 5-10 минут'
-        else:
-            text = 'Что то пошло не так'
-    except GeocoderTimedOut:
-        text = 'Ошибка определения адреса, попробуйте еще раз'
-
+    address = get_address(location)
+    ###
+    if Pokemon and address and save_pokemon_spawn_db(Pokemon, (location.latitude, location.longitude), dt, address):
+        text = 'Спавн покемона будет добавлен на карту в течение 5-10 минут'
+    else:
+        text = 'Что то пошло не так'
     _return_to_main_keyboard(client, message, text)
 
 
