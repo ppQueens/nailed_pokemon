@@ -11,8 +11,14 @@ l = 0, 0
 # print(location.raw['address'])
 
 l = [2,3]
+def kk():
+    try:
+        z = l[1]
+    except IndexError as e:
+        print(z)
+    else:
+        return True
+    finally:
+        print(2)
 
-try:
-    z = l[3]
-except IndexError as e:
-    print(z)
+print(kk())

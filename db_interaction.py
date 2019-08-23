@@ -12,26 +12,23 @@ def db(query, data):
         connection = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
         cursor = connection.cursor()
     except psycopg2.DatabaseError as de:
-        pass
         # log
+        return False
+
     try:
         # print(cursor.mogrify(add_spawn, data_spawn))
         cursor.execute(query, data)
         connection.commit()
-
-        return True
-    except AttributeError as ae:
-        print(ae)
     except psycopg2.DatabaseError as de:
         connection.rollback()
         #log
+    else:
+        return True
 
-    try:
+    finally:
         cursor.close()
         connection.close()
-    except Exception as e:
-        pass
-        #log
+        # log
     return False
 
 
@@ -47,7 +44,6 @@ def save_pokemon_spawn_db(pokemon, coordinates, dt, address):
     validation = SpawnDataValidation(pokemon, coordinates)
 
     if validation.validate():
-
         add_spawn = ("INSERT INTO  spawns_map_pokemonspawn"
                      "(pokemon_id, lat, lon, created, time_zone, modified, country, state, city, confirming_spawn, confirmed, on_map) "
                      "VALUES ((SELECT id FROM spawns_map_pokemon WHERE pokemon_name=%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
